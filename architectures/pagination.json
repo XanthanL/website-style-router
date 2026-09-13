@@ -1,0 +1,186 @@
+{
+  "version": 1,
+  "_doc": "页面粒度与页内导航的判定注册表 —— 阈值与规则的唯一真源。scripts/pick_pages.py 读它出推荐，scripts/audit_tokens.py 的 --site 模式读它做产出校验，architectures/granularity.md 是人读的解释。改阈值只改这里。",
+  "_why": "v0.8 及以前，IA 层只决定「这一页由哪些区块组成」，不决定「内容该分成几页」。结果是所有站都产出单个 index，条目再多也全塞进一页；长页也没有任何页内跳转。而这两件事都是内容驱动的，不是风格驱动的 —— 所以必须由判据决定，不能默认。",
+  "granularity": {
+    "legend": {
+      "entries": "同一集合的条目数（作品 / 商品 / 文章 / 房源 / 菜单条目）。没有集合就记 0。",
+      "depth": "条目平均内容深度：shallow = ≤1 段文字或 ≤1 张图；medium = 2–3 段或 2–5 张图；deep = ≥4 段或 ≥6 张图。",
+      "shareable": "条目是否需要独立 URL —— 用户会想把「这一条」单独发给别人。",
+      "indexable": "条目是否需要被搜索引擎单独收录（商品 / 作品 / 案例常为是；豆单 / 营业信息为否）。",
+      "themes": "除集合之外，还有几个「各自成篇、内容量足以独占一页」的并列独立主题（关于 / 服务 / 案例 / 博客 / 招聘 / 多语言版）。只有一段话的「关于」不算。",
+      "maintainer": "nontech / tech —— 决定敢不敢用多页（多页意味着多份要维护的东西）。",
+      "static_gen": "能否用单一数据源静态生成多页（如 astro 的 getStaticPaths）。能则「多页」不增加维护成本 —— 数据仍只有一份，页面是生成的。"
+    },
+    "levels": {
+      "single": {
+        "name": "单页",
+        "pages": "1 页（仅索引）",
+        "when": "内容是一个整体（一段叙事 / 一个转化动作），或条目少且浅、条目不可独立引用。",
+        "cost": "条目多且深时，深度内容会被压成缩略；单条无法被分享、无法被收录。",
+        "shape": "src/pages/index.astro 或 index.html"
+      },
+      "master-detail": {
+        "name": "主从（索引 + 详情）",
+        "pages": "1 + N（索引页 + 每条一个详情页，通常由同一个模板生成）",
+        "when": "条目 ≥4 且平均深度 ≥medium，且条目可独立引用或需被单独收录。",
+        "cost": "需要一份数据源 + 一个详情模板；数据源不统一时会退化成两份真源。",
+        "shape": "src/pages/index.astro + src/pages/work/[slug].astro（一个模板，N 个页面）"
+      },
+      "multi-page": {
+        "name": "多页并列",
+        "pages": "≥3（首页 + 若干各自成篇的独立页）",
+        "when": "除集合外还有 ≥2 个并列的独立主题。",
+        "cost": "导航与页脚要承载栏目结构；主题之间容易各自为政、失去统一节奏。",
+        "shape": "src/pages/{index,about,services,work/[slug]}.astro"
+      },
+      "n/a": {
+        "name": "不适用",
+        "pages": "0（不搭站）",
+        "when": "交付形态为 system-only：只出 token，不搭站。",
+        "cost": "无。",
+        "shape": "—"
+      }
+    },
+    "rules": [
+      {
+        "id": "G1",
+        "if": "themes >= 2",
+        "then": "multi-page",
+        "why": "并列的独立主题塞进一页会互相打断（读「关于」的人被商品区截断），且各自需要能被单独链接"
+      },
+      {
+        "id": "G2",
+        "if": "entries >= 4 and depth in (medium, deep) and (shareable or indexable)",
+        "then": "master-detail",
+        "why": "条目多且有独立深度内容，用户会「只要那一条」—— 需要一个能落到单条的 URL"
+      },
+      {
+        "id": "G3",
+        "if": "entries >= 12 and depth in (medium, deep)",
+        "then": "master-detail",
+        "why": "即使不可分享，条目数也已多到单页扫读失效；索引页本身要能被筛、能定位到某一条"
+      },
+      {
+        "id": "G4",
+        "if": "true",
+        "then": "single",
+        "why": "兜底：内容是一个整体，或条目少且浅，拆页只会得到几个空洞的页面"
+      }
+    ],
+    "veto": [
+      {
+        "id": "V1",
+        "if": "maintainer == nontech and static_gen == false",
+        "then": "降级为 single",
+        "why": "多页需要维护多份文件；不能静态生成时，非技术维护者会弃坑。降级必须在交付说明里写明代价（哪些内容因此被压成缩略）"
+      }
+    ],
+    "thresholds": {
+      "entries_master_detail": 4,
+      "entries_master_detail_forced": 12,
+      "themes_multi_page": 2,
+      "depth_qualifying": ["medium", "deep"]
+    }
+  },
+  "inPageNav": {
+    "legend": {
+      "blocks": "首页的区块 / 章节数（<section> 或同级标题计数）。",
+      "lookup": "其中「查阅型区块」的个数：FAQ / 规格表 / 合规信息 / 索引 / 附录 —— 用户对它们是「来查」而不是「来读」。",
+      "linear": "是否线性阅读：叙事长页为 true；可跳读的索引页 / 目录页为 false。",
+      "screens": "预估屏数（可选）。比区块数更能反映真实长度，长图 / 长表会把它推高。"
+    },
+    "levels": {
+      "none": {
+        "name": "无",
+        "when": "区块 ≤3，或单屏单动作。",
+        "note": "不是「偷懒」，是内容真的短。加导航只会是噪音。"
+      },
+      "anchor-jump": {
+        "name": "锚点跳转",
+        "when": "区块 ≥4 且（存在查阅型区块 或 是线性叙事）。",
+        "note": "静态跳转链接（顶部一行 / 行内目录），不跟随滚动。给「来查某一段」的人一条捷径。"
+      },
+      "sticky-toc": {
+        "name": "粘性目录",
+        "when": "区块 ≥8。",
+        "note": "跟随滚动的目录（桌面侧栏 / 移动折叠），带当前位置高亮。"
+      },
+      "section-rail": {
+        "name": "章节轨",
+        "when": "区块 ≥12 或预估 ≥10 屏。",
+        "note": "常驻的左侧章节轨 + 进度指示，用于超长文档型页面。"
+      }
+    },
+    "rules": [
+      {"id": "N1", "if": "blocks <= 3", "then": "none"},
+      {"id": "N2", "if": "screens >= 10 or blocks >= 12", "then": "section-rail"},
+      {"id": "N3", "if": "blocks >= 8", "then": "sticky-toc"},
+      {"id": "N4", "if": "blocks >= 4 and (lookup >= 1 or linear)", "then": "anchor-jump"},
+      {"id": "N5", "if": "true", "then": "none"}
+    ],
+    "veto": [
+      {
+        "id": "V1",
+        "if": "ia == conversion and lookup == 0 and blocks < 7",
+        "then": "none",
+        "why": "转化页的区块是「说服链」的一环，给目录等于请用户跳离说服链。只有出现查阅型区块（FAQ / 规格 / 合规）时才给锚点，且只指向那些区块 —— 不给「跳到底部 CTA」之外的整页目录"
+      },
+      {
+        "id": "V2",
+        "if": "nav 声明为 sticky-toc / section-rail 但页面为单屏单动作",
+        "then": "降级为 none",
+        "why": "单屏页面没有可跳的目标，粘性目录只会遮住唯一的内容"
+      }
+    ],
+    "thresholds": {
+      "blocks_none_max": 3,
+      "blocks_anchor_min": 4,
+      "blocks_sticky_min": 8,
+      "blocks_rail_min": 12,
+      "screens_rail_min": 10,
+      "none_contradiction_blocks": 5,
+      "min_anchor_targets": 2
+    }
+  },
+  "iaDefaults": {
+    "portfolio": {
+      "granularity": "master-detail",
+      "nav": "none",
+      "note": "作品是条目集合，每件要能被单独分享；索引页本身是网格，扫读即可，不需要目录。"
+    },
+    "narrative": {
+      "granularity": "single",
+      "nav": "anchor-jump",
+      "note": "线性长页；章节编号本身就是天然的导航锚点，做了才叫「章节」。"
+    },
+    "directory": {
+      "granularity": "single",
+      "nav": "none",
+      "note": "单页索引 + 单一数据源；条目是「今天有什么」，不可独立引用也不该被收录。"
+    },
+    "conversion": {
+      "granularity": "single",
+      "nav": "none",
+      "note": "整页服务一个动作；只有出现合规 / 规格 / FAQ 这类查阅型区块时才升为 anchor-jump。"
+    }
+  },
+  "falsify": {
+    "single": [
+      "若渲染后条目详情无处安放（每条被压成 ≤2 行、图只能露一张）→ 内容撑爆了单页，应升为 master-detail",
+      "若用户或你本人有「想把某一条发给别人」的动作 → 单页没有可分享的 URL，应升为 master-detail"
+    ],
+    "master-detail": [
+      "若详情页平均正文 < 120 字或图 < 2 张 → 内容撑不起独立页，应退回 single 并合并区块",
+      "若详情页只是把索引页已有的文字原样放大 → 没有新信息，是假子页，应退回 single"
+    ],
+    "multi-page": [
+      "若某个并列主题的正文 < 300 字且不含集合 → 它不是独立主题，应合并回首页区块",
+      "若上线后 30 天内独立页的自然流量占比 < 5% → 该拆分没有带来可发现性，应合并"
+    ],
+    "nav": [
+      "若上线后 30 天内没有任何一次页内锚点点击 → 该导航是噪音，删掉",
+      "若移动端首屏被目录挤占超过 1/3 高度 → 档位过重，降一档（sticky-toc → anchor-jump）"
+    ]
+  }
+}

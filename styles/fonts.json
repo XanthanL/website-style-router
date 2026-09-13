@@ -1,0 +1,728 @@
+{
+  "_note": "字体搭配注册表。解决 v0.6 及以前的「字体单一」问题：当时 signatures.json 只有 disp(serif/sans/mono/mix) 一个角色位，emit_tokens.py 的 FONT 字典只有 3 个通用栈，导致 40 个锚点产出的 --font-display/--font-body 永远是 'Inter, -apple-system…' / 'Newsreader…' / 'JetBrains Mono…' 三选一。本表给每个锚点一对**具名、可获取、互不相同**的字体，让「风格区分」真正落到字上，而不只是落在色板上。",
+  "_why": "字体的辨识度高于配色：把同一份布局的标题从 Inter 换成 Fraunces，观感变化远大于换强调色。所以字体必须是选型的一等公民，而不是 token 生成时的兜底常量。",
+  "_loadingLegend": {
+    "self": "自托管（下载 woff2 放 assets/fonts/，配 font-display: swap）。隐私好、无第三方请求，是默认。",
+    "cdn": "CDN 引入（Google Fonts / Fontshare）。仅在需要大量字重、或 CJK 字体体积过大不宜自托管时用；须写 <link rel=preconnect>。",
+    "system": "不加载，直接用 OS 字体（CJK 默认走这条，避免几 MB 的中文字库拖垮首屏）。"
+  },
+  "_rules": {
+    "R1_具名": "--font-display 的首选必须是**具名字体**，不得以 system-ui / -apple-system / sans-serif / serif / monospace 单独打头。通用栈只允许出现在回退位置。",
+    "R2_分离": "--font-display 的首选字体 ≠ --font-body 的首选字体。同一站用同一个字体当标题与正文 = 没做搭配，是 AI 均值味的来源。",
+    "R3_全库唯一": "40 个锚点的 display 字体**全库不重复**（每个锚点一个专属标题字体）。这是反同质化的硬约束，由 validate_skill.py F8 校验。",
+    "R4_中文回退显式": "必须显式声明 CJK 回退栈，且**不得让中文字体渲染西文**（西文由 display/body 的拉丁字体承担）。",
+    "R5_字重克制": "每套搭配实际使用的字重 ≤2（配合 signatures.json 的 wts）。加载时只拉用到的字重，别拉全家桶。",
+    "R6_可获取": "只用开源/免费可商用的字体（Google Fonts / Fontshare / 官方开源发布）。禁用来源不明或需授权付费的字体。"
+  },
+  "_cjkStacks": {
+    "zh-serif": "\"Noto Serif SC\", \"Source Han Serif SC\", \"Songti SC\", serif",
+    "zh-song": "\"Source Han Serif SC\", \"Noto Serif SC\", \"Songti SC\", serif",
+    "zh-sans": "\"Noto Sans SC\", \"Source Han Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+    "zh-kai": "\"LXGW WenKai\", \"Kaiti SC\", \"STKaiti\", serif",
+    "zh-round": "\"ZCOOL XiaoWei\", \"Noto Sans SC\", \"PingFang SC\", sans-serif",
+    "zh-seal": "\"ZCOOL QingKe HuangYou\", \"Noto Serif SC\", serif",
+    "zh-brush": "\"Ma Shan Zheng\", \"STKaiti\", serif",
+    "jp-serif": "\"Shippori Mincho\", \"Noto Serif JP\", \"Yu Mincho\", serif",
+    "jp-sans": "\"Zen Kaku Gothic New\", \"Noto Sans JP\", \"Hiragino Kaku Gothic ProN\", sans-serif",
+    "mono-cjk": "\"Noto Sans Mono CJK SC\", \"Sarasa Mono SC\", ui-monospace, monospace"
+  },
+  "_monoStacks": {
+    "plex": "\"IBM Plex Mono\", ui-monospace, \"SFMono-Regular\", Consolas, monospace",
+    "jetbrains": "\"JetBrains Mono\", ui-monospace, \"SFMono-Regular\", Consolas, monospace",
+    "space": "\"Space Mono\", ui-monospace, Consolas, monospace",
+    "roboto": "\"Roboto Mono\", ui-monospace, Consolas, monospace",
+    "martian": "\"Martian Mono\", ui-monospace, Consolas, monospace",
+    "sharetech": "\"Share Tech Mono\", ui-monospace, monospace",
+    "azeret": "\"Azeret Mono\", ui-monospace, Consolas, monospace",
+    "fragment": "\"Fragment Mono\", ui-monospace, Consolas, monospace"
+  },
+  "_familyDefaults": {
+    "editorial": {
+      "display": "Fraunces",
+      "body": "Spectral",
+      "mono": "plex",
+      "cjk": "zh-serif",
+      "loading": "self"
+    },
+    "grid": {
+      "display": "Archivo",
+      "body": "Inter",
+      "mono": "plex",
+      "cjk": "zh-sans",
+      "loading": "self"
+    },
+    "contemplative": {
+      "display": "Cormorant Garamond",
+      "body": "Jost",
+      "mono": "jetbrains",
+      "cjk": "zh-serif",
+      "loading": "self"
+    },
+    "craft": {
+      "display": "Marcellus",
+      "body": "Karla",
+      "mono": "roboto",
+      "cjk": "zh-kai",
+      "loading": "self"
+    },
+    "industrial": {
+      "display": "Oswald",
+      "body": "Roboto",
+      "mono": "roboto",
+      "cjk": "zh-sans",
+      "loading": "self"
+    },
+    "commerce": {
+      "display": "Anton",
+      "body": "Inter",
+      "mono": "roboto",
+      "cjk": "zh-sans",
+      "loading": "self"
+    },
+    "expressive": {
+      "display": "Syne",
+      "body": "Space Grotesk",
+      "mono": "space",
+      "cjk": "zh-sans",
+      "loading": "self"
+    },
+    "nostalgic": {
+      "display": "DM Serif Display",
+      "body": "DM Sans",
+      "mono": "fragment",
+      "cjk": "zh-song",
+      "loading": "self"
+    },
+    "techno": {
+      "display": "Sora",
+      "body": "Inter",
+      "mono": "jetbrains",
+      "cjk": "zh-sans",
+      "loading": "self"
+    },
+    "vernacular": {
+      "display": "Ma Shan Zheng",
+      "body": "Noto Serif SC",
+      "mono": "fragment",
+      "cjk": "zh-kai",
+      "loading": "cdn"
+    },
+    "institutional": {
+      "display": "Public Sans",
+      "body": "Inter",
+      "mono": "plex",
+      "cjk": "zh-sans",
+      "loading": "self"
+    }
+  },
+  "_familyPools": {
+    "editorial": [
+      {
+        "tag": "报刊正文感",
+        "display": "\"Source Serif 4\", Georgia, serif",
+        "body": "\"Public Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "plex",
+        "cjk": "zh-serif",
+        "note": "Source Serif 4 的报纸骨架撑得起长标题，Public Sans 保持中立不抢戏。"
+      },
+      {
+        "tag": "温和长文",
+        "display": "\"Petrona\", Georgia, serif",
+        "body": "\"Work Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "jetbrains",
+        "cjk": "zh-song",
+        "note": "Petrona 的圆润笔锋降低长文压迫感，Work Sans 提供稳定的正文色。"
+      },
+      {
+        "tag": "板衬线阅读",
+        "display": "\"Bitter\", Georgia, serif",
+        "body": "\"Rubik\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "roboto",
+        "cjk": "zh-sans",
+        "note": "Bitter 是屏幕优化的板衬线，小字号也不糊；Rubik 的微圆角呼应其亲和。"
+      }
+    ],
+    "grid": [
+      {
+        "tag": "紧凑中性",
+        "display": "\"Work Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "body": "\"Noto Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "plex",
+        "cjk": "zh-sans",
+        "note": "Work Sans 的略宽字怀自带现代感，Noto Sans 的均衡骨架提供稳定正文。"
+      },
+      {
+        "tag": "机械清晰",
+        "display": "\"Chivo\", \"Helvetica Neue\", Arial, sans-serif",
+        "body": "\"Public Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "roboto",
+        "cjk": "zh-sans",
+        "note": "Chivo 的粗重起笔适合做编号与表头，Public Sans 承担正文。"
+      },
+      {
+        "tag": "北欧理性",
+        "display": "\"Familjen Grotesk\", \"Helvetica Neue\", Arial, sans-serif",
+        "body": "\"IBM Plex Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "plex",
+        "cjk": "zh-sans",
+        "note": "Familjen Grotesk 的窄骨架自带冷感，IBM Plex Sans 提供工程味正文。"
+      }
+    ],
+    "contemplative": [
+      {
+        "tag": "古典静观",
+        "display": "\"Sorts Mill Goudy\", Georgia, serif",
+        "body": "\"Jost\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "jetbrains",
+        "cjk": "zh-song",
+        "note": "Sorts Mill Goudy 的老式衬线带手写余韵，Jost 的几何体保持现代距离。"
+      },
+      {
+        "tag": "纤细留白",
+        "display": "\"Crimson Pro\", Georgia, serif",
+        "body": "\"Outfit\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "plex",
+        "cjk": "zh-serif",
+        "note": "Crimson Pro 的细笔适合大字留白，Outfit 的圆几何体撑住正文呼吸。"
+      },
+      {
+        "tag": "柔光衬线",
+        "display": "\"Cormorant Infant\", Georgia, serif",
+        "body": "\"Manrope\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "jetbrains",
+        "cjk": "zh-song",
+        "note": "Cormorant Infant 的高对比衬线在大字号下最优雅，Manrope 收住正文。"
+      }
+    ],
+    "craft": [
+      {
+        "tag": "质朴厚实",
+        "display": "\"Vollkorn\", Georgia, serif",
+        "body": "\"Karla\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "plex",
+        "cjk": "zh-kai",
+        "note": "Vollkorn 的厚实衬线像手工印刷，Karla 的怪诞骨架带手作的不规则感。"
+      },
+      {
+        "tag": "手抄温度",
+        "display": "\"Alegreya\", Georgia, serif",
+        "body": "\"Cabin\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "roboto",
+        "cjk": "zh-kai",
+        "note": "Alegreya 的笔势有书写感，Cabin 的人文无衬线承接温度。"
+      },
+      {
+        "tag": "东方纸感",
+        "display": "\"Amiri\", Georgia, serif",
+        "body": "\"Nunito Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "jetbrains",
+        "cjk": "zh-song",
+        "note": "Amiri 的书法骨架做标题有纸面质感，Nunito Sans 的圆角柔化正文。"
+      }
+    ],
+    "industrial": [
+      {
+        "tag": "标语冲击",
+        "display": "\"Bebas Neue\", Impact, sans-serif",
+        "body": "\"Roboto Condensed\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "roboto",
+        "cjk": "zh-sans",
+        "note": "Bebas Neue 的窄高大写是工业标语的默认解，Roboto Condensed 同窄同调。"
+      },
+      {
+        "tag": "技术图纸",
+        "display": "\"Chivo Mono\", ui-monospace, monospace",
+        "body": "\"Chivo\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "martian",
+        "cjk": "zh-sans",
+        "note": "Chivo Mono 做标题把技术感前置，Chivo 无衬线正文保证可读。"
+      },
+      {
+        "tag": "粗粝窄体",
+        "display": "\"Darker Grotesque\", Impact, sans-serif",
+        "body": "\"IBM Plex Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "plex",
+        "cjk": "zh-sans",
+        "note": "Darker Grotesque 的极端窄体制造压迫感，IBM Plex Sans 稳住正文。"
+      }
+    ],
+    "commerce": [
+      {
+        "tag": "窄体货架",
+        "display": "\"Archivo Narrow\", Impact, sans-serif",
+        "body": "\"Inter\", \"Helvetica Neue\", \"PingFang SC\", sans-serif",
+        "mono": "plex",
+        "cjk": "zh-sans",
+        "note": "Archivo Narrow 在货架标签式的窄空间里塞得下长品名。"
+      },
+      {
+        "tag": "手写招牌",
+        "display": "\"Yanone Kaffeesatz\", Impact, sans-serif",
+        "body": "\"Karla\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "roboto",
+        "cjk": "zh-round",
+        "note": "Yanone Kaffeesatz 的窄长手写感像市集招牌，Karla 的怪诞承接市井气。"
+      },
+      {
+        "tag": "半窄价签",
+        "display": "\"Barlow Semi Condensed\", Impact, sans-serif",
+        "body": "\"Barlow\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "roboto",
+        "cjk": "zh-sans",
+        "note": "Barlow 家族的半窄标题配常规正文，同源不同宽，价签场景最省空间。"
+      }
+    ],
+    "expressive": [
+      {
+        "tag": "霓虹线性",
+        "display": "\"Monoton\", Impact, sans-serif",
+        "body": "\"Work Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "sharetech",
+        "cjk": "zh-round",
+        "note": "Monoton 的多线霓虹只做短标题，Work Sans 把正文拉回可读。"
+      },
+      {
+        "tag": "等宽重击",
+        "display": "\"Rubik Mono One\", Impact, sans-serif",
+        "body": "\"Rubik\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "sharetech",
+        "cjk": "zh-sans",
+        "note": "Rubik Mono One 的方块字重击力强，Rubik 同族正文保持系统一致。"
+      },
+      {
+        "tag": "可变扭曲",
+        "display": "\"Tilt Warp\", Impact, sans-serif",
+        "body": "\"Inter\", \"Helvetica Neue\", \"PingFang SC\", sans-serif",
+        "mono": "azeret",
+        "cjk": "zh-sans",
+        "note": "Tilt Warp 的可变扭曲轴制造不稳定感，Inter 提供冷静的反差底座。"
+      }
+    ],
+    "nostalgic": [
+      {
+        "tag": "维多利亚",
+        "display": "\"Abril Fatface\", Georgia, serif",
+        "body": "\"Lato\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "roboto",
+        "cjk": "zh-song",
+        "note": "Abril Fatface 的超粗衬线是十九世纪广告体，Lato 提供温顺正文。"
+      },
+      {
+        "tag": "南亚复古",
+        "display": "\"Rozha One\", Georgia, serif",
+        "body": "\"Poppins\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "plex",
+        "cjk": "zh-song",
+        "note": "Rozha One 的高对比粗衬线带异域复古，Poppins 的几何体做现代中和。"
+      },
+      {
+        "tag": "装饰轻雅",
+        "display": "\"Italiana\", Georgia, serif",
+        "body": "\"Josefin Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "jetbrains",
+        "cjk": "zh-song",
+        "note": "Italiana 的细长装饰体做标题，Josefin Sans 的装饰几何体同频呼应。"
+      }
+    ],
+    "techno": [
+      {
+        "tag": "轨道科幻",
+        "display": "\"Orbitron\", Impact, sans-serif",
+        "body": "\"Rajdhani\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "sharetech",
+        "cjk": "zh-sans",
+        "note": "Orbitron 的方几何科幻体配 Rajdhani 的窄技术体，整套在同一语汇里。"
+      },
+      {
+        "tag": "泰式终端",
+        "display": "\"Chakra Petch\", Impact, sans-serif",
+        "body": "\"IBM Plex Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "plex",
+        "cjk": "zh-sans",
+        "note": "Chakra Petch 的切角笔画有仪器面板感，IBM Plex Sans 提供工程正文。"
+      },
+      {
+        "tag": "宽体仪表",
+        "display": "\"Michroma\", Impact, sans-serif",
+        "body": "\"Inter\", \"Helvetica Neue\", \"PingFang SC\", sans-serif",
+        "mono": "azeret",
+        "cjk": "zh-sans",
+        "note": "Michroma 的等宽宽体像仪表盘铭牌，Inter 保证数据可读。"
+      }
+    ],
+    "vernacular": [
+      {
+        "tag": "招牌黑体",
+        "display": "\"ZCOOL QingKe HuangYou\", \"Noto Sans SC\", sans-serif",
+        "body": "\"Noto Sans SC\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+        "mono": "jetbrains",
+        "cjk": "zh-sans",
+        "note": "站酷庆科黄油体的圆头招牌味配思源黑体正文，市井但不廉价。"
+      },
+      {
+        "tag": "行草笔意",
+        "display": "\"Long Cang\", \"Noto Serif SC\", serif",
+        "body": "\"Noto Serif SC\", \"Songti SC\", serif",
+        "mono": "jetbrains",
+        "cjk": "zh-brush",
+        "note": "龙藏体的行草骨架做标题，思源宋体正文稳住阅读节奏。"
+      },
+      {
+        "tag": "宋黑对照",
+        "display": "\"Noto Serif SC\", \"Songti SC\", serif",
+        "body": "\"Noto Sans SC\", \"PingFang SC\", sans-serif",
+        "mono": "jetbrains",
+        "cjk": "zh-serif",
+        "note": "思源宋体做标题、思源黑体做正文 —— 同厂两体，对照最干净。"
+      }
+    ],
+    "institutional": [
+      {
+        "tag": "开源双体",
+        "display": "\"Source Sans 3\", \"Helvetica Neue\", Arial, sans-serif",
+        "body": "\"Source Serif 4\", Georgia, serif",
+        "mono": "plex",
+        "cjk": "zh-serif",
+        "note": "Source Sans 3 做标题、Source Serif 4 做正文，Adobe 同源双体的正式感。"
+      },
+      {
+        "tag": "企业工程",
+        "display": "\"IBM Plex Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "body": "\"IBM Plex Serif\", Georgia, serif",
+        "mono": "plex",
+        "cjk": "zh-serif",
+        "note": "Plex 家族自带的工程机构气质，标题正文一冷一暖。"
+      },
+      {
+        "tag": "公共信息",
+        "display": "\"Libre Franklin\", \"Helvetica Neue\", Arial, sans-serif",
+        "body": "\"Public Sans\", \"Helvetica Neue\", Arial, sans-serif",
+        "mono": "roboto",
+        "cjk": "zh-sans",
+        "note": "Libre Franklin 的历史无衬线配 Public Sans 的现代中立，公共服务语汇。"
+      }
+    ]
+  },
+  "anchors": {
+    "editorial-print": {
+      "display": "\"Fraunces\", \"Playfair Display\", Georgia, serif",
+      "body": "\"Spectral\", Georgia, \"Noto Serif SC\", serif",
+      "mono": "plex",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Fraunces 的软性光学衬线（有 'wonk' 光学尺寸）配 Spectral 的阅读体——像一本 60 年代的文艺刊物内页。"
+    },
+    "editorial-hero": {
+      "display": "\"Playfair Display\", Georgia, serif",
+      "body": "\"Lora\", Georgia, \"Noto Serif SC\", serif",
+      "mono": "plex",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Playfair 的高对比社论标题 + Lora 的圆润正文，是「一句主张压全场」的经典组合。"
+    },
+    "magazine-grid": {
+      "display": "\"Bodoni Moda\", \"Playfair Display\", Georgia, serif",
+      "body": "\"Source Serif 4\", Georgia, \"Noto Serif SC\", serif",
+      "mono": "jetbrains",
+      "cjk": "zh-song",
+      "loading": "self",
+      "note": "Bodoni 的极细发丝衬线只在杂志大标题上成立，正文必须换 Source Serif 才读得下去。"
+    },
+    "longform-narrative": {
+      "display": "\"Literata\", Georgia, serif",
+      "body": "\"Source Serif 4\", Georgia, \"Noto Serif SC\", serif",
+      "mono": "plex",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Literata 是为屏幕长阅读设计的衬线（Google Play Books 的默认体），与正文同族不同级。"
+    },
+    "swiss-utility": {
+      "display": "\"Archivo\", \"Helvetica Neue\", Arial, sans-serif",
+      "body": "\"Inter\", \"Helvetica Neue\", \"PingFang SC\", sans-serif",
+      "mono": "plex",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Archivo 的紧致骨架像公交站牌与价目表；IBM Plex Mono 的规整等宽撑起台账的数字列。"
+    },
+    "swiss-editorial": {
+      "display": "\"Newsreader\", \"Source Serif 4\", Georgia, serif",
+      "body": "\"Inter\", \"Helvetica Neue\", \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "瑞士网格的骨架 + Newsreader 的编辑体标题：理性但不冷。"
+    },
+    "data-dense-app": {
+      "display": "\"Barlow Condensed\", \"Roboto Condensed\", sans-serif",
+      "body": "\"IBM Plex Sans\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "plex",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Barlow Condensed 在窄栏里塞得下更长的列名，是仪表盘标题的实用解。"
+    },
+    "technical-drawing": {
+      "display": "\"Space Mono\", ui-monospace, monospace",
+      "body": "\"IBM Plex Sans\", \"Inter\", sans-serif",
+      "mono": "space",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Space Mono 带图纸标注的机械感（它的斜杠与数字尤其像工程图），正文用 Plex Sans 保证可读。"
+    },
+    "quiet-luxury": {
+      "display": "\"Cormorant Garamond\", \"EB Garamond\", Georgia, serif",
+      "body": "\"Jost\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Cormorant 的极细高对比衬线 + Jost 的几何无衬线（Futura 的开源替身）= 静奢的『不解释』。"
+    },
+    "agentic-minimal": {
+      "display": "\"Instrument Serif\", \"Playfair Display\", serif",
+      "body": "\"Inter\", -apple-system, \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Instrument Serif 只在极少数字上出现，其余全交给 Inter——留白本身是内容。"
+    },
+    "japanese-ma": {
+      "display": "\"Shippori Mincho\", \"Noto Serif JP\", \"Yu Mincho\", serif",
+      "body": "\"Zen Kaku Gothic New\", \"Noto Sans JP\", \"Hiragino Kaku Gothic ProN\", sans-serif",
+      "mono": "plex",
+      "cjk": "jp-serif",
+      "loading": "cdn",
+      "note": "Shippori Mincho 的明朝体横向笔画细、纵向粗，正是「间」需要的呼吸感；正文配 Zen 角ゴシック。"
+    },
+    "scandinavian-clean": {
+      "display": "\"Outfit\", \"Poppins\", sans-serif",
+      "body": "\"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Outfit 的几何圆润 + 浅灰木色，是北欧家居的日常温和，不装高级。"
+    },
+    "warm-hospitality": {
+      "display": "\"Gloock\", \"Fraunces\", Georgia, serif",
+      "body": "\"Nunito Sans\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "roboto",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Gloock 的暖调高对比衬线像手写招牌；正文用 Nunito Sans 的圆端，配『来坐坐』的调性。"
+    },
+    "soft-organic": {
+      "display": "\"Baloo 2\", \"Quicksand\", sans-serif",
+      "body": "\"Nunito\", \"PingFang SC\", sans-serif",
+      "mono": "roboto",
+      "cjk": "zh-round",
+      "loading": "self",
+      "note": "Baloo 2 的粗圆笔画自带亲和的拟物感，和 20px 圆角是一套语言。"
+    },
+    "craft-artisanal": {
+      "display": "\"Marcellus\", \"Cormorant\", serif",
+      "body": "\"Karla\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "plex",
+      "cjk": "zh-kai",
+      "loading": "self",
+      "note": "Marcellus 的罗马碑刻体有手工凿刻的痕迹，正对『人做的』；正文 Karla 保持朴素。"
+    },
+    "paper-ink": {
+      "display": "\"Libre Baskerville\", \"Baskerville\", Georgia, serif",
+      "body": "\"EB Garamond\", \"Garamond\", Georgia, serif",
+      "mono": "fragment",
+      "cjk": "zh-song",
+      "loading": "self",
+      "note": "两套老派衬线的搭配：Baskerville 撑标题，Garamond 做正文——像活字印刷的套印关系。"
+    },
+    "diagonal": {
+      "display": "\"Prata\", \"Playfair Display\", Georgia, serif",
+      "body": "\"Inter\", \"Helvetica Neue\", \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Prata 的高对比衬线大字标配 135° 斜线，是工业遗产品牌的语言（须与宿主 DIAGONAL 令牌一致）。"
+    },
+    "industrial-documentary": {
+      "display": "\"Oswald\", \"Roboto Condensed\", sans-serif",
+      "body": "\"Roboto\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "roboto",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Oswald 的窄体大写像工地编号与集装箱喷码，是纪实档案的默认笔迹。"
+    },
+    "concrete-brutalist": {
+      "display": "\"Archivo Black\", \"Arial Black\", sans-serif",
+      "body": "\"Space Grotesk\", \"Helvetica Neue\", Arial, sans-serif",
+      "mono": "space",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Archivo Black 的超粗块状字 + Space Grotesk 的粗粝正文，刻意不做『设计感』——反设计即主张。"
+    },
+    "archival-index": {
+      "display": "\"Martian Mono\", \"Space Mono\", ui-monospace, monospace",
+      "body": "\"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "martian",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Martian Mono 是可变等宽，宽度能随栏宽微调——为『查档』这种高密度元数据表而生。"
+    },
+    "provisions-label": {
+      "display": "\"Anton\", \"Oswald\", sans-serif",
+      "body": "\"Inter\", \"PingFang SC\", \"Microsoft YaHei\", sans-serif",
+      "mono": "roboto",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Anton 的超重压缩体是食品包装品名的标准写法（信息量最大、占地最小），正文回到中性 Inter。"
+    },
+    "product-catalog": {
+      "display": "\"Manrope\", \"Inter\", sans-serif",
+      "body": "\"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "plex",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Manrope 的现代几何比 Inter 多一点辨识度，用来区分 SKU 目录的标题与正文。"
+    },
+    "market-stall": {
+      "display": "\"Zilla Slab\", \"Roboto Slab\", serif",
+      "body": "\"Karla\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "roboto",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Zilla Slab 的方肩衬线像手写价签，配 Karla 的朴素正文——市集的即时与烟火气。"
+    },
+    "luxury-retail": {
+      "display": "\"Tenor Sans\", \"Jost\", sans-serif",
+      "body": "\"Jost\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Tenor Sans 的窄高字身 + 极宽字距 = 精品店门头；正文 Jost 保持同一几何家族的低调。"
+    },
+    "expressive-artistic": {
+      "display": "\"Syne\", \"Space Grotesk\", sans-serif",
+      "body": "\"Space Grotesk\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "space",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Syne 的字重跨度极大（400→800），标题可以当图形用；正文 Space Grotesk 承接同一怪诞感。"
+    },
+    "deconstructivist": {
+      "display": "\"Unbounded\", \"Syne\", sans-serif",
+      "body": "\"Space Grotesk\", \"Inter\", sans-serif",
+      "mono": "space",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Unbounded 的宽扁字形天然错位、失衡，正好服务解构；正文退回 Grotesk 保证仍能读。"
+    },
+    "collage-cutout": {
+      "display": "\"Bricolage Grotesque\", \"Archivo\", sans-serif",
+      "body": "\"Work Sans\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "fragment",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Bricolage Grotesque 的字形自带『拼贴感』（不规则的字面宽度），与剪贴素材同源。"
+    },
+    "kinetic-type": {
+      "display": "\"Big Shoulders Display\", \"Oswald\", sans-serif",
+      "body": "\"Archivo\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Big Shoulders 是可变字重显示体，逐字入场与滚动位移时能连续变形；正文用 Archivo 稳住。"
+    },
+    "retro-nostalgic": {
+      "display": "\"DM Serif Display\", \"Playfair Display\", serif",
+      "body": "\"DM Sans\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "fragment",
+      "cjk": "zh-song",
+      "loading": "self",
+      "note": "DM Serif Display 的圆润粗衬线有 70 年代印刷味，与做旧网点纸底同源。"
+    },
+    "art-deco-glam": {
+      "display": "\"Cinzel\", \"Playfair Display\", serif",
+      "body": "\"Josefin Sans\", \"Jost\", \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Cinzel 直接取自罗马碑刻大写（Deco 的几何奢华正源于此），Josefin Sans 的细长几何承接 1920s。"
+    },
+    "mid-century-modern": {
+      "display": "\"Yeseva One\", \"Playfair Display\", serif",
+      "body": "\"Karla\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "roboto",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Yeseva One 的粗圆衬线是 50–60 年代广告体的典型，配 Karla 的暖木色时代感。"
+    },
+    "glass-tech": {
+      "display": "\"Sora\", \"Inter\", sans-serif",
+      "body": "\"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "jetbrains",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Sora 的字腔开阔、几何现代，在半透明发光层上仍能保持锐利。"
+    },
+    "cyber-terminal": {
+      "display": "\"Share Tech Mono\", ui-monospace, monospace",
+      "body": "\"IBM Plex Mono\", ui-monospace, monospace",
+      "mono": "sharetech",
+      "cjk": "mono-cjk",
+      "loading": "self",
+      "note": "Share Tech Mono 的等宽荧光字是终端语法的本命；正文也用等宽（本锚点禁用中文长正文）。"
+    },
+    "dark-console": {
+      "display": "\"Azeret Mono\", \"JetBrains Mono\", ui-monospace, monospace",
+      "body": "\"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "azeret",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Azeret Mono 在深灰底上比 JetBrains 更收敛（字重均匀、不刺眼），适合长时间盯屏。"
+    },
+    "ink-wash": {
+      "display": "\"Ma Shan Zheng\", \"STKaiti\", serif",
+      "body": "\"Noto Serif SC\", \"Source Han Serif SC\", \"Songti SC\", serif",
+      "mono": "fragment",
+      "cjk": "zh-kai",
+      "loading": "cdn",
+      "note": "马善政毛笔体只在标题上用（书法体不可作正文），正文回到思源宋——留白与笔触的对比。"
+    },
+    "washi-japanese": {
+      "display": "\"Zen Old Mincho\", \"Shippori Mincho\", serif",
+      "body": "\"Zen Kaku Gothic New\", \"Noto Sans JP\", sans-serif",
+      "mono": "plex",
+      "cjk": "jp-serif",
+      "loading": "cdn",
+      "note": "Zen Old Mincho 的老明朝体有和纸的纤维感，比 Shippori 更沉——茶器的静。"
+    },
+    "seal-script-cn": {
+      "display": "\"ZCOOL XiaoWei\", \"Noto Serif SC\", serif",
+      "body": "\"Noto Serif SC\", \"Source Han Serif SC\", serif",
+      "mono": "fragment",
+      "cjk": "zh-seal",
+      "loading": "cdn",
+      "note": "站酷小薇体的笔画末端有刀刻感，汉字本身即主图形；正文用思源宋保证可读。"
+    },
+    "corporate-structured": {
+      "display": "\"Public Sans\", \"Inter\", sans-serif",
+      "body": "\"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "plex",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Public Sans 是 USWDS 的官方字体，为『多方审阅、长期维护』而生，克制到近乎中性。"
+    },
+    "institutional-archive": {
+      "display": "\"Roboto Slab\", \"Zilla Slab\", serif",
+      "body": "\"Roboto\", \"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "roboto",
+      "cjk": "zh-sans",
+      "loading": "self",
+      "note": "Roboto Slab 的机械方衬线像档案盒标签，与 Roboto 正文同族同源，检索优先。"
+    },
+    "museum-modern": {
+      "display": "\"Spectral\", \"Source Serif 4\", Georgia, serif",
+      "body": "\"Inter\", \"PingFang SC\", sans-serif",
+      "mono": "plex",
+      "cjk": "zh-serif",
+      "loading": "self",
+      "note": "Spectral 的学术衬线做展讯标题，正文回到 Inter 的白墙式克制——作品被当作展品对待。"
+    }
+  }
+}
