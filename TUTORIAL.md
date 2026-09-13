@@ -1281,4 +1281,31 @@ v0.9.1 用这个方法审出 34 条铁律里只有 14 条有判据，其中 5 �
 
 ---
 
+---
+
+## 附：内容库规模清单
+
+> 这份清单原来放在 README 里，因为太细搬到这里。想知道「仓库里到底有什么、各有多大」，看这一节就够。
+
+| 资产 | 文件 | 规模 |
+|---|---|---|
+| 风格锚点 | `styles/index.json` | 40 个，每个都带 `layout` / `axis` / `imagePolicy` / `iconPolicy` / `density` / `when` / `never` |
+| 字体搭配 | `styles/fonts.json` | 40 套具名 display × body 搭配，**display 全库唯一**，含 mono / 中文回退 / 加载策略 |
+| 族级备用搭配 | `styles/fonts.json` → `_familyPools` | 33 对（11 族 × 3），供同锚点第二次使用时轮换，与 40 个主搭配零重复 |
+| 底色预设 | `styles/signatures.json` → `_surfacePresets` | 7 档：white / paper / tint / stone / slate / ink / deep，含两档深底 |
+| 尺度变体轴 | `styles/signatures.json` → `_variantAxes` | 4 条：原值 / 收紧 / 放松 / 张扬，对字阶公比、基准字号、间距单位、圆角做带 clamp 的偏移 |
+| 候选技术栈 | `techstack.md` + `scripts/pick_stack.py` | 7 个：plain-html / astro / eleventy / vite / next / nuxt / hugo |
+| 风格族 | `styles/families.md` | 11 个，收敛用的中间层，由「内容支撑力 / 转化目标 / 密度诉求」决定，**不由品类决定** |
+| 完整 spec | `styles/specs/` | 6 个可直接粘的 token 骨架 |
+| IA 原型 | `architectures/` | 4 个：portfolio / narrative / directory / conversion，各带默认页面粒度与默认页内导航（可被内容推翻） |
+| 内容维度 | `architectures/pagination.json` + `scripts/pick_pages.py` | 页面粒度 × 页内导航，阈值集中在注册表，脚本只读不硬编码 |
+| 参考池 | `referencePool` | 20 个，含 game-lab 的 70 种可切换皮肤 |
+
+本地 spec 不够用时按 `_specFallback` 三级降级，中间一级可外接 `npx typeui.sh pull <slug>` 的 67 种风格。
+
+**13 类输入源预案**：PDF / 图片 / docx / xlsx+csv / pptx / md+txt / 视频 / 音频 / 现有站 / 参考站 / 纯文字 / 混合 / 无输入 —— 每一类都有自己的提取路径、降级方案和坑（见 `source.md`）。
+不能处理的情况会**明说**，不会假装：本机没有 OCR 时扫描件要用户提供文字，没有 ASR 时视频旁白要用户提供字幕。`scripts/check_env.py` 会先告知。
+
+---
+
 **下一步**：回到 [`CONCEPTS.md`](CONCEPTS.md) 末尾的「60 秒自我检查清单」，试着回答那八个问题。答得出来，你就真的掌握了。
