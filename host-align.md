@@ -13,7 +13,7 @@
 5. **不许静默影响其他路由。** 改公共组件前先确认它被谁用；必要时只加可选分支，保持默认路径行为不变。
 6. **宿主技术栈优先。** 宿主是 Next 就在 Next 里落地，不要在页面里塞第二套构建链。
    此时 `techstack.md` 的 Phase 1.5 **退化为「确认宿主栈 + 说明本页如何在其内落地」**（`pick_stack.py --host embedded --host-stack <宿主>`），不做重新选型。
-   字体同理：`styles/fonts.json` 的锚点搭配被宿主字体覆盖（见 `examples/vivian-peng-portfolio`，其 `--font-display` 用宿主的 Newsreader 而非锚点默认的 Prata）。
+   字体同理：`styles/fonts.json` 的锚点搭配会被宿主字体覆盖 —— 嵌入时 `--font-display` 用宿主的那一款，而不是锚点默认的。
 
 ---
 

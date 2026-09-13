@@ -4,7 +4,7 @@
 
 ## [0.9.2] — 2026-09-13
 
-处理质量审计（`docs/quality-audit.md`）查出的两处 **token 超预算**，约束是**尽量不失原有功能**。
+处理质量审计（`质量审计`）查出的两处 **token 超预算**，约束是**尽量不失原有功能**。
 
 ### 诊断
 
@@ -53,10 +53,10 @@
   这恰恰是 v0.9.1 用来识别欠账的判据形态：**「违反它的最小产物长什么样，有哪个脚本会报错」**
   答不出脚本名。所以拆完必须立刻补这条判据。
 
-  编号是外部引用锚点（`testing/test-cases.md`、`CONCEPTS.md`、脚本报错文案都按号引用），
+  编号是外部引用锚点（`测试用例集`、`CONCEPTS.md`、脚本报错文案都按号引用），
   所以只看「条数相同」不够 —— 跳号或错位会让引用指向另一条。
 
-- **`testing/negative_tests.py` 52 → 57 条**：H4 的 4 条负向（索引少一条 / 全文少一条 /
+- **`判据自测脚本` 52 → 57 条**：H4 的 4 条负向（索引少一条 / 全文少一条 /
   同编号两边不是同一条 / `rules.md` 整份消失）+ 1 条正向防误报
   `VALIDATE-base-pass`（未变异副本必须 `ERROR 0` 且不出现 `[H4]`）。
 
@@ -67,21 +67,20 @@
 
 ### Changed（发布范围）
 
-仓库只发 skill 本体 —— **`docs/`（研究过程资料）、`testing/`（测试基础设施）、
-`examples/`（实跑样例产物）三项目前不入库**（本机照常使用，只是不进 git）。
-`SKILL.md` 对这三个目录**零引用**，排除不影响 skill 运行。
+仓库只发 skill 本体 —— 研究过程资料、测试基础设施、实跑样例产物**不入库**。
+`SKILL.md` 对它们**零引用**，排除不影响 skill 运行。
 
 配套改了两处，否则干净克隆会崩：
 
 - **`validate_skill.py` C2 的两处缺口**：
   - `tokens.css` 补进 `ARTIFACTS` 白名单 —— 它是 `emit_tokens.py` 写进**产出站点**的文件，
-    仓库里本就不该有。**之前一直没被报，只是因为 `examples/` 里恰好有同名文件**
+    仓库里本就不该有。**之前一直没被报，只是因为 示例产物 里恰好有同名文件**
     （白名单的潜在缺口靠样例偶然掩盖，一排除就暴露成 13 条误报）。
   - 新增 `LOCAL_ONLY_DIRS` / `LOCAL_ONLY_BASENAMES`：指向这三个目录的引用降为 **info**。
     干净克隆里它们必然解析不到，那是预期状态不是断链。**已验证未削弱 C2** ——
     在发布文件里引用一个真正不存在的模块名（不在那三个目录里）仍会 WARN。
 - **两份 README + `CONCEPTS.md` + `TUTORIAL.md`**：删掉对不存在脚本的指令
-  （`python testing/negative_tests.py`）、结构树里的三个目录，
+  （`python 判据自测脚本`）、结构树里的三个目录，
   并加一行说明这些路径是本机资产。判据自测的方法论保留，只是不再指向不发布的文件。
 - **决策树支数漂移**：`intake.md` 实际是 **B0–B11 共 12 支**（v0.9 加了 B11 页面粒度与页内导航），
   但 `intake.md` 标题、`references/rules.md`、`references/filemap.md`、`SKILL.md` 的 G0 门、
@@ -132,7 +131,7 @@
   - **F20 产物形状反映技术栈**（铁律 29）：`plain-html` 不得出现 `astro.config.*` / `src/pages/`。
 - **`validate_skill.py` H3 中轴档位供给** —— 每档 `axis` 须 ≥3 个锚点、跨 ≥2 个布局原型、
   跨 ≥3 个族。抓的是**维度没正交**：某档 100% 绑定单一布局时，选它就等于选布局。
-- **`testing/negative_tests.py` 40 → 52 条** —— 新增 5 条 F16–F20 负向、
+- **`判据自测脚本` 40 → 52 条** —— 新增 5 条 F16–F20 负向、
   2 条 H3 负向、2 条中轴阈值用例（`LEDGER-axis-share` 负向 / `LEDGER-axis-two-kinds` 正向）、
   1 条 `--batch` 中轴占比负向，**`PIPE-all-anchors`**（40 个锚点逐个 `emit_tokens` + 单站审计
   必须全 F 级 0 —— 把「被验证过的锚点」从 3/40 拉到 **40/40**），以及 **`SITE-gold-pass`**
@@ -210,7 +209,7 @@
 | 散文（给人读的判断框架） | `architectures/granularity.md` |
 | 数据（阈值唯一真源） | `architectures/pagination.json` |
 | 计算（确定性推荐） | `scripts/pick_pages.py` |
-| 判据（产出层 + 仓库层 + 负向测试） | `audit_tokens.py --site` 的 F14/F15、`validate_skill.py` 的 H1/H2、`testing/negative_tests.py` |
+| 判据（产出层 + 仓库层 + 负向测试） | `audit_tokens.py --site` 的 F14/F15、`validate_skill.py` 的 H1/H2、`判据自测脚本` |
 
 ### Added
 
@@ -240,7 +239,7 @@
 - **`validate_skill.py` H 段（仓库层判据）** ——
   **H1**：四个 IA 文档里写的「默认粒度 / 默认页内导航」必须与 `pagination.json` 的 `iaDefaults` 一致
   （抓**文档漂移** —— 改注册表忘了改文档，或反之），并校验注册表含 `falsify` 段；
-  **H2**：`examples/` 下每个示例跑一遍 `audit_tokens.py --site`，必须 F 级 0。
+  **H2**：示例产物 下每个示例跑一遍 `audit_tokens.py --site`，必须 F 级 0。
 - **`SKILL.md` 新增铁律 33/34** —— 33「页面粒度是被判出来的，不是被默认成单页的」、
   34「页内导航的档位由内容决定，形态由布局决定」。
 - **新阶段门 G1.7「页面粒度与页内导航」** —— 位于 G1.6（批次查重）之后、G2（落定）之前；
@@ -254,7 +253,7 @@
 - **`checklist.md` 新增「页面粒度与可导航性（G1.7）」12 条**；
   **`design-qa.md`** F 级表补 F14/F15 行，「四条人眼判据」扩为「六条」
   （新增「详情页有没有索引页看不到的信息」「页内跳转落点准不准」）。
-- **`testing/negative_tests.py` 扩到 39 条** —— 新增 10 个变异体
+- **`判据自测脚本` 扩到 39 条** —— 新增 10 个变异体
   （`m_f9_missing_pick_pages`、`m_h1_missing_granularity`、`m_h1_drift`、`m_h1_registry_section`、
   `m_site_no_granularity`、`m_site_single_but_two_pages`、`m_site_master_detail_but_one_page`、
   `m_site_no_nav`、`m_site_nav_without_anchor`、`m_site_long_page_none`、`m_site_broken_anchor`）
@@ -262,21 +261,20 @@
 
 ### Changed
 
-- **`examples/vivian-peng-portfolio/` 改造为 `master-detail` 样板** ——
+- **`示例站点/` 改造为 `master-detail` 样板** ——
   新增 `src/layouts/SiteLayout.astro`（抽出顶栏 / 抽屉 / 底栏 / 语言切换，详情页复用）与
   `src/pages/work/[slug].astro`（`getStaticPaths` 一个模板生成 **17 个详情页**）；
   `index.astro` 的卡片主链接从 `#work-{slug}` 改为 `/work/{slug}`，
   灯箱从「唯一详情入口」降为「快速预览」按钮（另留 `打开详情页 ↗` 永久链接）。
   构建实测 **18 页**（1 索引 + 17 详情）。
-- **`examples/zigong-rabbit/` 改造为 `single + anchor-jump` 样板** ——
+- **`示例站点/` 改造为 `single + anchor-jump` 样板** ——
   `index.astro` 新增行内目录（4 个锚点）、补 `id`、`scroll-margin-top`，
   并用 `focus({preventScroll:true})` 把焦点移到落点（键盘/读屏可用）。
-- **`examples/12sqm-coffee/` 保持 `single + none`** —— 刻意**不**加目录、**不**拆页，
+- **`示例站点/` 保持 `single + none`** —— 刻意**不**加目录、**不**拆页，
   作为「判断的另一半」的对照：**不拆也是判断结果，不是遗漏**。
 - `SKILL.md` frontmatter `version` → 0.9.0；`description` 补「页面粒度与页内导航」及
   `page-granularity` / `in-page-navigation` 关键词；阅读顺序表补阶段 1.7。
-- `README.md` / `CHANGELOG.md` / `CONCEPTS.md` / `TUTORIAL.md` / `examples/README.md` /
-  `testing/test-cases.md` 同步。
+- `README.md` / `CHANGELOG.md` / `CONCEPTS.md` / `TUTORIAL.md` 同步。
 
 ### Fixed
 
@@ -354,9 +352,9 @@
   "签名不写进 `MASTER.md` = 没做"）。
 - **`checklist.md` 新增「批次差异合规（G1.6）」8 条**；`design-qa.md` F 级表补 F10/F11 行，
   词汇表补 `--surface` / `--variant`。
-- **`testing/test-cases.md` 新增 T14「同批五站」**（5 锚点 / 5 字体 / ≥3 底色 / ≥4 族，机检验收）
+- **`测试用例集` 新增 T14「同批五站」**（5 锚点 / 5 字体 / ≥3 底色 / ≥4 族，机检验收）
   与扰动脚本 P11/P12；通用评分卡补 G1.6。
-- **`testing/negative_tests.py`（判据负向测试，零依赖）** —— 给每条判据植入一处确定的违规，
+- **`判据自测脚本`（判据负向测试，零依赖）** —— 给每条判据植入一处确定的违规，
   断言它被对应的检查码抓住；同时含**正向防误报**用例（合规输入必须通过）。
   覆盖 27 条，分五组：`validate_skill`（F8–F13）、`audit_tokens` 单站（F6/F10）、
   `ledger.py`（查重与报告）、`audit_tokens --batch`（F11）、**端到端**（`emit_tokens.py` 真出
@@ -375,7 +373,7 @@
   「底色维度层」「批次账本层」；版本段改写为「开工前先确认版本」并记入本次教训。
 - `validate_skill.py`：`make_T07_menu_pdf.py` 加入 `OPTIONAL_FIXTURES`（作者主动移除，降级为 info）；
   `ARTIFACTS` 白名单加入 `.style-ledger.json`。
-- `README.md` / `CHANGELOG.md` / `testing/test-cases.md` 同步；测试用例数 12 → 14。
+- `README.md` / `CHANGELOG.md` / `测试用例集` 同步；测试用例数 12 → 14。
 
 ### Fixed
 
@@ -437,8 +435,8 @@
 - `README.md`：流程图加 Phase 1.5；「它解决什么」表补三条新失败模式；内容库与目录结构同步。
 
 ### Fixed
-- **三个示例的字体**：`12sqm-coffee`（swiss-utility）→ Archivo × Inter、`zigong-rabbit`（provisions-label）→ Anton × Inter、
-  `vivian-peng-portfolio`（diagonal）→ Prata × Inter（保留宿主字体优先级），全部补 `--font-display`/`--font-body`，
+- **三个站点的字体**：`swiss-utility` → Archivo × Inter、`provisions-label` → Anton × Inter、
+  `diagonal` → Prata × Inter（保留宿主字体优先级），全部补 `--font-display`/`--font-body`，
   使 `audit_tokens.py` 的 F6 通过。
 - **字体同质化**：40 个锚点的 display 字体此前完全一致（三选一），现**全库唯一**，由 `validate_skill.py` F8 机器保证。
 
@@ -459,20 +457,20 @@
 - `layouts.md` 的 `catalog-grid` 补上**作品变体**（作品卡 / 无价签 / 常见 `center-axis`），不再只描述商业 SKU 目录。
 
 ### Added
-- `README.md`（中英双段）、`LICENSE`（MIT）、`.gitignore`、`CHANGELOG.md`、`THIRD-PARTY.md`、`examples/README.md`。
+- `README.md`（中英双段）、`LICENSE`（MIT）、`.gitignore`、`CHANGELOG.md`、`THIRD-PARTY.md`。
 - `scripts/check_env.py` —— 探测 Python 依赖 / ffmpeg / OCR / ASR，输出能力表与降级建议，支持 `--json`。
 - `scripts/validate_skill.py` —— **规范与自洽自检**，无第三方依赖，可直接接 CI。A 段 frontmatter 规范、B 段结构、C 段文档间引用、D 段仓库卫生、**E 段注册表跨文件一致性**（锚点的 layout / family / axis 必须落在定义域内、spec 必须有同名锚点、示例 `MASTER.md` 必须声明 `--axis`）。A–D 与 E 各做过负向测试（植入 8 类 + 4 类违规，全部被捕获）。
 - `styles/index.json` 新增 `_specFallback`：命中锚点但无本地 spec 时的三级降级规则（typeui → 用 7 个元数据字段现场落 token → 换同族带 spec 的锚点），并明确禁止凭印象补 spec。
-- `docs/rationale.md`（原根目录 `DECISION.md` 归档）——立项调研：为什么是「改写现成选型引擎」而不是自研。
+- `立项调研`（原根目录 `DECISION.md` 归档）——立项调研：为什么是「改写现成选型引擎」而不是自研。
 
 ### Fixed
-- **注册表与示例互相矛盾**（E 段就是为抓这类漂移而加的）：`styles/index.json` 的 `diagonal` 声明 `layout: split-narrative`，而 `examples/vivian-peng-portfolio/content-profile.md` 明确记录「选 `catalog-grid` 而非 `split-narrative`」且站点确实是作品网格 → 锚点改为 `catalog-grid`（`axis: center-axis` 不变）。
+- **注册表与示例互相矛盾**（E 段就是为抓这类漂移而加的）：`styles/index.json` 的 `diagonal` 声明 `layout: split-narrative`，而 `示例站点/content-profile.md` 明确记录「选 `catalog-grid` 而非 `split-narrative`」且站点确实是作品网格 → 锚点改为 `catalog-grid`（`axis: center-axis` 不变）。
 - **中轴表与实测值冲突**：`layouts.md` 原把 `editorial-hero` 标为 `center-axis`，但按 `provisions-label` 真实做出的转化页是 `left-rail`（与 `index.json` 一致，页面无任何居中）→ 改为以锚点为准。
-- 三个示例的 `design-system/MASTER.md` 全部**缺 `--axis`**（输出契约要求）→ 补齐；`12sqm-coffee` / `zigong-rabbit` 采用 token 表行的形式。
-- **品牌斜线角度写错**：vivian 示例的 3 份文档写作 145°，而该站 CSS（`index.astro` / `tokens.css`）与 Diagonal 自身的 `.diagonal-line` 都是 **135°**（145° 是页面转场参数，二者极易混）→ 统一为 135°。
+- 三份 `design-system/MASTER.md` 全部**缺 `--axis`**（输出契约要求）→ 补齐，其中两份采用 token 表行的形式。
+- **品牌斜线角度写错**：某站的 3 份文档写作 145°，而该站 CSS（`index.astro` / `tokens.css`）与 Diagonal 自身的 `.diagonal-line` 都是 **135°**（145° 是页面转场参数，二者极易混）→ 统一为 135°。
 - 锚点计数不一致：`styles/index.json`（2 处）与 `styles/families.md`（1 处）误写 41，实际为 **40**。
-- `examples/README.md` 的对照表写错了锚点 / IA / 布局 / 中轴，素材数量写成「124 张 / 22 MB」（实为 **62 张 / 约 11 MB**）→ 按实测重写，并补上「回归测试」清单。
-- 移除 `examples/` 下的构建产物（`node_modules` / `dist` / `.astro`）与 6 个一次性 `_*.py` 脚本（`_diff` / `_extract` / `_fix_images` / `_gen_diagonal` / `_map` / `_verify`），其职责已由 `scripts/extract_source.py` + `scripts/verify_assets.py` 承接。
+- 示例对照表写错了锚点 / IA / 布局 / 中轴，素材数量写成「124 张 / 22 MB」（实为 **62 张 / 约 11 MB**）→ 按实测重写，并补上「回归测试」清单。
+- 移除示例下的构建产物（`node_modules` / `dist` / `.astro`）与 6 个一次性 `_*.py` 脚本（`_diff` / `_extract` / `_fix_images` / `_gen_diagonal` / `_map` / `_verify`），其职责已由 `scripts/extract_source.py` + `scripts/verify_assets.py` 承接。
 
 ## [0.4.0] — 2026-09-12
 

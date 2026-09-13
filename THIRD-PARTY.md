@@ -28,9 +28,3 @@
 | [openpyxl](https://foss.heptapod.net/openpyxl/openpyxl) | MIT | .xlsx / .csv 读取 |
 | [python-pptx](https://github.com/scanny/python-pptx) | MIT | .pptx 文本与图片提取 |
 | [ffmpeg](https://ffmpeg.org/) | LGPL / GPL（视构建） | 视频抽帧、音频转码（可选） |
-
-## 示例素材
-
-`examples/vivian-peng-portfolio/assets/` 中的作品图片**版权归艺术家本人所有**，仅用于本地演示，**未纳入版本控制**（见 `.gitignore`）。该目录需从原始画册自行提取后才会生成，详见 `examples/README.md`。
-
-`examples/` 下其余示例（咖啡店 / 自贡手撕兔）为虚构内容，仅作演示。

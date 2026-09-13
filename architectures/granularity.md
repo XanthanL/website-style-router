@@ -209,7 +209,7 @@ python scripts/pick_pages.py --entries 6 --depth medium --indexable \
 ### 4.3 交付前校验
 
 ```bash
-python scripts/audit_tokens.py --site examples/vivian-peng-portfolio
+python scripts/audit_tokens.py --site <站点目录>
 ```
 
 它比对**声明**与**实际产物**：

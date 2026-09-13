@@ -47,9 +47,6 @@
 - [`scripts/emit_tokens.py`](../scripts/emit_tokens.py) — **签名 + 字体搭配 → 完整 token 骨架**（字阶 / 行高 / 字距 / 栅格 / OKLCH 配色 / 具名字体栈 + WCAG 校验）；支持 `--surface` 底色档 / `--variant` 尺度变体轴 / `--pair` 族备用池字体，零依赖
 - [`scripts/audit_tokens.py`](../scripts/audit_tokens.py) — **产出审计**（含 **F6 字体搭配**、**F10 视觉签名**）+ 签名一致性校验；**`--site <站点目录>` 执行 F14/F15 页面结构审计**（声明的页面粒度 / 页内导航 vs 实际页面数与锚点）；**`--batch <目录>` 执行 F11 批次差异度审计**（跨站去重）。零依赖，可接 CI
 - [`scripts/validate_skill.py`](../scripts/validate_skill.py) — **改完本 skill 后跑一遍**：校验 frontmatter 是否符合 Agent Skills 规范、文档间引用是否自洽、仓库里有没有混进构建产物；G 段另校验底色维度 / 变体轴 / 族字体池 / 批次账本是否齐备
-- [`testing/negative_tests.py`](../testing/negative_tests.py) — **加了新判据就跑一遍**：对每条判据植入一处确定的违规，断言它被对应的检查码抓住。**一个永远返回 PASS 的判据等于没有判据** —— 正向测试只能证明「不误报」，证明不了「能报错」。零依赖，只在临时副本里变异，不动仓库
-- [`examples/`](../examples/) — 3 个完整实跑样例（咖啡店 / 自贡手撕兔 / 艺术家作品集 PDF），各含 `content-profile.md` / `design-system/` / 可跑站点。**当作输出形状的参考，不要当模板抄。**
-- [`testing/`](../testing/) — 回归用例（`test-cases.md`，含 T13/T14 同批多站用例）与合成夹具（如无文字层扫描件 PDF），用于验证降级路径
 
 ## 环境与外部依赖
 

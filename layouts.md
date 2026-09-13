@@ -60,7 +60,7 @@
 ```
 
 > 反例记档：真实作品集（17 件作品）选的是**本原型而非 `split-narrative`** —— 逐一长滚不适合多件作品；
-> `split-narrative` 退为点开单件后的详情/灯箱阅读。见 `examples/vivian-peng-portfolio/content-profile.md`。
+> `split-narrative` 退为点开单件后的详情/灯箱阅读。
 
 ---
 

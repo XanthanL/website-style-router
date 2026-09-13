@@ -1,8 +1,5 @@
 # 使用教学 —— 从零到改得动
 
-> **关于路径**：文中出现的 `examples/`、`testing/`、`docs/` 是**本机开发资产**，
-> 不随仓库发布（见 `.gitignore`）。克隆下来的仓库里没有这些目录 —— 这不影响 skill 运行，
-> `SKILL.md` 对它们零引用；只是文中对应的示例与自测命令在本机才有。
 
 > 本文回答**「怎么做」**：装在哪、每道门在干什么、每个命令怎么用、想改东西动哪个文件。
 > 想知道**「为什么这样设计」**，看 [`CONCEPTS.md`](CONCEPTS.md)。
@@ -88,7 +85,7 @@ v 可用能力：PDF / 图片 / 文本 / Markdown / 视频抽帧
 |---|---|---|
 | **必需** | `pypdf`、`Pillow` | 只要处理 PDF / 图片就需要 |
 | **按需** | `python-docx`、`openpyxl`、`python-pptx` | 遇到 .docx / .xlsx / .pptx 才装 |
-| **零依赖** | `emit_tokens.py`、`audit_tokens.py`、`ledger.py`、`validate_skill.py`、`pick_stack.py`、`negative_tests.py` | **随时可跑**，不需要装任何东西 |
+| **零依赖** | `emit_tokens.py`、`audit_tokens.py`、`ledger.py`、`validate_skill.py`、`pick_stack.py` | **随时可跑**，不需要装任何东西 |
 | **外部命令** | `node`/`npm`（Node 栈）、`ffmpeg`（视频抽帧）、`tesseract`（OCR）、`whisper`（ASR） | 按需 |
 | **可选工具** | `uipro`、`npx typeui.sh`、`hue` | 都不是前置条件 |
 
@@ -100,7 +97,6 @@ v 可用能力：PDF / 图片 / 文本 / Markdown / 视频抽帧
 
 用一个真实用例走一遍：**楼下修鞋摊，大爷修鞋四十年，不会电脑，想让人知道还开着、修什么、多少钱。**
 
-> 这个用例对应 `testing/test-cases.md` 的 **T13-A**。
 
 ### 阶段 -1 · 源材料与交付形态（门 G-1）
 
@@ -213,9 +209,9 @@ python scripts/ledger.py --check --dir <工作区> \
 
 ```
 冲突：
-  ✗ 锚点「warm-hospitality」已被 12sqm-coffee 使用（1 次）—— 高冲突
-  ✗ display 字体「Gloock」已被 12sqm-coffee 使用（1 次）—— 高冲突
-  △ 布局原型「editorial-hero」已被 12sqm-coffee、zigong-rabbit 使用（2 次）—— 中冲突
+  ✗ 锚点「warm-hospitality」已被「站点 A」使用（1 次）—— 高冲突
+  ✗ display 字体「Gloock」已被「站点 A」使用（1 次）—— 高冲突
+  △ 布局原型「editorial-hero」已被「站点 A」「站点 B」使用（2 次）—— 中冲突
 
 建议：
   · 锚点改选（同族未用）：craft-artisanal、paper-ink、soft-organic
@@ -425,9 +421,9 @@ python scripts/pick_pages.py --entries 17 --depth deep --shareable --indexable \
 
 - 阈值全部读 `architectures/pagination.json`，脚本不硬编码 —— 改标准只改那一个 JSON。
 - 它**只算档位，不决定形态**。具体做成行内目录还是吸顶条，看 `layouts.md`。
-- **`single` 和 `none` 都是合法结论**，不是「没判出来」。三个示例各演示一种：
-  `12sqm-coffee` → `single + none`；`zigong-rabbit` → `single + anchor-jump`；
-  `vivian-peng-portfolio` → `master-detail + none`。
+- **`single` 和 `none` 都是合法结论**，不是「没判出来」。内容浅的站可以就是 `single + none`，
+  有规格/做法/FAQ 这类查阅型区块的是 `single + anchor-jump`，
+  条目需要单独分享的才是 `master-detail + none`。
 
 ### ★ `scripts/emit_tokens.py` — token 生成
 
@@ -480,7 +476,7 @@ F 3 / I 2 / S 8  →  FAIL（判据见 design-qa.md）
 **`--site` 模式**（v0.9 新增，查**结构**而非数值）：
 
 ```
-audit_tokens --site  ·  vivian-peng-portfolio
+audit_tokens --site  ·  my-site
 ====================================================================
   ✓ [F14] 页面粒度声明 `master-detail`，实际 18 个页面文件（1 索引 + 17 详情）
   ✓ [F15] 页内导航声明 `none`，无锚点要求
@@ -617,46 +613,13 @@ RESULT: PASS
 | 编号 | 查什么 | 抓什么问题 |
 |---|---|---|
 | **H1** | 四个 IA 文档写的「默认粒度 / 默认页内导航」与 `pagination.json` 的 `iaDefaults` 一致；注册表含 `falsify` 段 | **文档漂移** —— 改了注册表忘了改文档，或反之。这类漂移单看任何一个文件都自洽，只有交叉比对才暴露 |
-| **H2** | `examples/` 下每个示例跑一遍 `audit_tokens.py --site`，必须 F 级 0 | 示例结构与判据脱节 |
 | **H3** | 每档 `axis` 须 ≥3 个锚点、跨 ≥2 个布局原型、跨 ≥3 个族 | **维度没正交** —— 某档中轴 100% 绑定单一布局时，选中轴就等于选布局，布局与族的自由度被一起锁死 |
-
-### ★ `testing/negative_tests.py` — 判据负向测试
-
-```bash
-python testing/negative_tests.py            # 跑全部
-python testing/negative_tests.py -k F12     # 只跑 id 含 F12 的
-python testing/negative_tests.py -k SITE    # 只跑 --site 那组（v0.9 新增）
-python testing/negative_tests.py --list     # 只列用例
-python testing/negative_tests.py --keep     # 保留临时目录以便排查
-```
-
-**加了任何判据，都必须跑这个。** 它给每条判据植入一处确定的违规，断言被抓到。覆盖 **57 条**，
-分七组：`validate_skill`（F8–F13 + H1 + H3 + H4）、`audit_tokens` 单站（F6/F10）、
-**`audit_tokens --site`（F14–F20 + 三个示例与黄金站点的正向防误报）**、`ledger`（含中轴占比）、
-`--batch`（含中轴占比）、端到端。
-
-**它只在临时副本里变异，原仓库一个字节都不改。**
-
-> **踩过的坑**：它启动时会把整个 skill 目录 `copytree` 到临时目录。
-> 如果 `examples/` 下留着 `node_modules`（几百 MB），这一步会慢到被系统杀掉，
-> 表现为**无任何输出、退出码 1、Signal: SIGTERM**。跑之前先清干净：
-> `rm -rf examples/*/node_modules examples/*/dist examples/*/.astro`。
-> （`IGNORE` 里虽然列了这些目录，但 `assets/` 里的图仍会被拷，仓库越小越快。）
-
----
-
-## §4 自定义实战
-
-八种改法，按难度从低到高。**每一条都给出「改哪里 → 怎么验证 → 报错怎么办」。**
 
 ### 通用铁则：改完必跑
 
 | 你改了什么 | 必须跑 |
 |---|---|
 | skill 里的任何文件 | `python scripts/validate_skill.py` → `ERROR 0` |
-| `examples/` 下的产出 | `python scripts/audit_tokens.py <MASTER.md>` → `F 级 0` |
-| `examples/` 下的产出结构 | `python scripts/audit_tokens.py --site <站点目录>` → `F 级 0` |
-| 任何判据 | `python testing/negative_tests.py` → 全抓到 |
 
 ---
 
@@ -940,35 +903,6 @@ python scripts/validate_skill.py    # F9 查 techstack.md 与 pick_stack.py 都�
 
 - [`design-qa.md`](design-qa.md) —— 数值判据的说明与修法
 - [`checklist.md`](checklist.md) —— 如果它属于交付前必过项
-- `testing/negative_tests.py` —— **负向测试用例**
-
-**负向测试怎么写**（`testing/negative_tests.py` 的用例结构）：
-
-```python
-def m_f14_xxx(root):
-    """一句话说明这处违规是什么。"""
-    d = jload(root, SIG)          # 读 JSON
-    d["某个字段"] = 违规值          # 植入违规
-    jdump(root, SIG, d)           # 写回（临时副本）
-
-VALIDATE_CASES = [
-    # (id, 说明, 判据码, 输出中必须出现的子串, 变异函数)
-    ("F14-xxx", "一句话说明", "F14", "报错里的关键子串", m_f14_xxx),
-]
-```
-
-**验证**：
-
-```bash
-python testing/negative_tests.py -k F14
-# 期望：抓到 ✓
-```
-
-**写负向测试的三个要点**：
-
-1. **必须有正向防误报用例**。只测「违规被抓」会把判据越改越严，最后正常产出也被拦下。
-2. **断言的是「判据码 + 关键子串」**，不是「退出码」。退出码可能是 1 因为别的原因。
-3. **变异只发生在临时副本**。`negative_tests.py` 会 `copytree` 一份再改，原仓库零改动。
 
 ---
 
@@ -988,7 +922,7 @@ python testing/negative_tests.py -k F14
 | **1 数据** | 新建 `architectures/<维度>.json` | 档位定义 + 规则 + 否决条件 + **全部阈值**。这是唯一真源，脚本不许硬编码 |
 | **2 散文** | 新建 `architectures/<维度>.md` | 判断框架（给人读）：决策树、判据表、各档产物形状、反模式、证伪条件、声明格式 |
 | **3 计算** | 新建 `scripts/pick_pages.py` 这类脚本 | 读注册表 → 输出**档位 + 逐条理由 + 被排除档位 + 证伪条件** |
-| **4 判据** | `audit_tokens.py` 的 `--site` + `validate_skill.py` + `negative_tests.py` | 校验「声明 = 实际」，并配负向测试 |
+| **4 判据** | `audit_tokens.py` 的 `--site` + `validate_skill.py` | 校验「声明 = 实际」，并配负向测试 |
 
 **第 4 步的三个必查项**：
 
@@ -1073,7 +1007,6 @@ python testing/negative_tests.py -k F14
 | 路径跑到 `E:\e\Code\...` | Git Bash 的 MSYS 路径转换 | 用 Windows 风格路径 `"E:/Code/..."` |
 | 账本落到了奇怪的地方 | `--dir` 没给，默认 `.` | 显式传 `--dir <工作区>` |
 | `emit_tokens.py` 输出带了说明头，写进 CSS 报错 | 没加 `--css-only` | 加 `--css-only` |
-| `negative_tests.py` **无任何输出**、退出码 1、`Signal: SIGTERM` | 启动时 `copytree` 整个 skill 目录，`examples/` 下的 `node_modules` 太大，被杀 | 先 `rm -rf examples/*/node_modules examples/*/dist examples/*/.astro` 再跑 |
 | `--site` 报「找不到页面文件」但目录里明明有 | 页面文件不在 `src/pages/` 下，或扩展名不在白名单（`.astro/.html/.md/.jsx/.tsx/.vue/.svelte`） | 确认站点用的是框架默认的页面目录 |
 | `npm run build` 报 `SAFE_DELETE_BULK_CONFIRM_REQUIRED` | 环境有批量删除保护，vite 清依赖缓存触发 | `rm -rf node_modules/.vite` 后再 build |
 
@@ -1087,10 +1020,10 @@ python testing/negative_tests.py -k F14
 | 数据里有 `images: [...]` 却只渲染第一张 | 字段定义了没渲染 | 人眼比对 `content-profile.md` 与渲染结果（铁律 19） |
 | `MASTER.md` 写 `#B83232`，站点实际 `#B33A2A` | 两份真源漂移 | 铁律 26：一份真源，`MASTER.md` 是副本 |
 | 5 个站单看都合格，摆一起全一样 | 判据只有单站这一条腿 | `audit_tokens.py --batch` |
-| 所有门禁全绿，但视觉签名 5/5 缺失 | 判据不存在 | `negative_tests.py` 会暴露这类问题 |
+| 所有门禁全绿，但视觉签名 5/5 缺失 | 判据不存在 | 判据自测会暴露这类问题 |
 | 声明 `master-detail`、页数也对，但详情页只是卡片放大 | **假子页**：拆了等于没拆 | 机器判据查不到，靠人眼（`design-qa.md` 六条人眼判据） |
 | 页内目录点了能跳，但落点被吸顶栏盖住一半 | 没设 `scroll-margin-top` | 人眼；F15 只能验「锚点存在且可达」，验不了「落点准」 |
-| 目录锚点全对，但键盘用户跳过去焦点还在原处 | 没做跳转后 `focus()` | 人眼 + 无障碍检查；`zigong-rabbit` 示例里有 `focus({preventScroll:true})` 的写法 |
+| 目录锚点全对，但键盘用户跳过去焦点还在原处 | 没做跳转后 `focus()` | 人眼 + 无障碍检查（跳转后要 `focus({preventScroll:true})`） |
 | `--site` 全绿，但详情页没有独立 URL（仍是 `#anchor`） | 粒度声明对了、实现没跟上 | 人眼：点开卡片看地址栏变不变 |
 
 ---
@@ -1125,12 +1058,6 @@ done
 python scripts/audit_tokens.py --batch $WS
 # 期望：底色 5/5 唯一、display 5/5 唯一、中轴不塌缩 → 综合：PASS
 ```
-
-> **别拿 `examples/` 跑 `--batch` 当冒烟测试** —— 它必然 FAIL，而且这是**设计如此**：
-> 阈值是为 5 个站以上的批次定的（中轴要求 ≥2 种且单档 ≤60%），
-> 而三个示例只有 3 个站、且中轴**刻意**撞车
-> （left-rail / left-rail / center-axis，`examples/README.md` 里写明了）。
-> 拿它验证脚本，只会得到一个「看起来脚本坏了」的错误结论。
 
 ### 6.2 跑对比
 
@@ -1253,7 +1180,7 @@ python scripts/ledger.py --commit --dir <工作区> \
 | 想改 | 读 |
 |---|---|
 | 加锚点 | [`layouts.md`](layouts.md)（layout/axis 定义域）+ `styles/families.md`（族）+ `styles/signatures.json` 的 `_legend` |
-| 加判据 | [`design-qa.md`](design-qa.md) + `testing/negative_tests.py` 的头部注释 |
+| 加判据 | [`design-qa.md`](design-qa.md) + `scripts/audit_tokens.py` 的判据实现 |
 | 改选型逻辑 | [`intake.md`](intake.md) + [`decide.md`](decide.md) |
 | 改技术栈判断 | [`techstack.md`](techstack.md) + `scripts/pick_stack.py` |
 | **改页面粒度 / 页内导航判断** | `architectures/pagination.json`（**改阈值只改这里**）+ [`architectures/granularity.md`](architectures/granularity.md) + `scripts/pick_pages.py` |
@@ -1266,9 +1193,7 @@ python scripts/ledger.py --commit --dir <工作区> \
 |---|---|
 | `scripts/check_env.py` | 探测脚本，跑就行，不用读 |
 | `scripts/extract_pdf_assets.py` | 只在特定场景用 |
-| `docs/rationale.md` | 立项调研存档，历史资料 |
 | [`THIRD-PARTY.md`](THIRD-PARTY.md) | 致谢清单 |
-| `testing/fixtures/*` | 测试夹具，除非你要重跑 T02/T03/T07/T09 |
 
 ---
 
@@ -1280,7 +1205,6 @@ python scripts/ledger.py --commit --dir <工作区> \
 python scripts/validate_skill.py      # 改了 skill 自身 → ERROR 0
 python scripts/audit_tokens.py <MASTER.md>   # 改了产出的数值 → F 级 0
 python scripts/audit_tokens.py --site <站点目录>  # 改了产出的结构 → F 级 0
-python testing/negative_tests.py      # 加了判据 → 57/57 全抓到
 ```
 
 ### 一次交付的完整命令序列

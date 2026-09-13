@@ -62,7 +62,7 @@ Describe what you want and hand over the material:
 
 ```
 Use website-style-router to turn this PDF into a website that suits it.
-(attached: Vivian portfolio.pdf)
+(attached: the source PDF)
 ```
 
 The pipeline runs end to end and **stops for your confirmation exactly once**, at "lock-in":
@@ -133,15 +133,13 @@ python scripts/validate_skill.py                    # repo self-check
 
 ## Granularity in practice
 
-Three full runs (a coffee shop, a food product page, an artist portfolio PDF) came to **three different granularity verdicts** — evidence that the judgment actually fires instead of defaulting to a single page:
+Granularity is **computed**, so the verdict tracks the content:
 
-| Run | Granularity | In-page nav | Why |
+| Content shape | Granularity | In-page nav | Why |
 |---|---|---|---|
-| coffee shop | `single` | `none` | 3 blocks, shallow content; splitting or adding a ToC would be a downgrade |
-| food product | `single` | `anchor-jump` | One page is enough, but it has three lookup-oriented blocks (specs / preparation / FAQ) |
-| artist portfolio | `master-detail` | `none` | 17 works, each must be shareable on its own → index + `[slug]` detail (builds 18 pages) |
-
-Their layouts, typefaces, surfaces and signatures also differ deliberately, so they double as a demonstration that style drives layout and that batches do not collide. The run outputs themselves are local development assets and are not shipped in this repo.
+| 3 blocks, shallow | `single` | `none` | Splitting or adding a ToC would be a downgrade |
+| One page, three lookup blocks (specs / prep / FAQ) | `single` | `anchor-jump` | One page is enough, but readers jump between sections |
+| 17 items, each must be shareable | `master-detail` | `none` | Index plus one detail page per item |
 
 ---
 
@@ -192,7 +190,6 @@ website-style-router/
                               # audit_tokens · ledger · validate_skill
 ```
 
-`examples/`, `testing/` and `docs/` exist locally but are **not published** — this repo ships the skill itself. See `.gitignore`.
 
 ## Documentation
 

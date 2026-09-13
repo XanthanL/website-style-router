@@ -72,7 +72,7 @@ python scripts/check_env.py
 
 ```
 用 website-style-router，把这个 PDF 做成一个适合它的网站
-（附：Vivian portfolio.pdf）
+（附：原始素材）
 ```
 
 流程会自动走完 8 个阶段，**只在「落定」那一步停下来找你要确认**：
@@ -137,7 +137,6 @@ website-style-router/
 └── scripts/                  # check_env / pick_stack / pick_pages / extract_source / extract_pdf_assets / verify_assets / emit_tokens / audit_tokens / ledger / validate_skill
 ```
 
-`examples/`、`testing/`、`docs/` 本机存在但**不随仓库发布** —— 这里只发 skill 本体，见 `.gitignore`。
 
 `scripts/` 里三个**判断与反同质化专用**工具：
 
@@ -151,17 +150,15 @@ python scripts/audit_tokens.py --site <站点目录>     # 产出层结构审计
 python scripts/audit_tokens.py --batch <工作区>      # 产出层批次差异度（事后，无 FAIL 才算过）
 ```
 
-## 示例
+## 页面粒度怎么判
 
-三次从头跑完的完整案例（咖啡店 / 自贡手撕兔 / 艺术家作品集 PDF）产出了**三种不同的页面粒度结论** —— 说明粒度是真被判断出来的，不是默认单页。三个案例的布局、字体、底色、签名也刻意各不相同，正是为了演示「风格驱动布局」与「批次不撞车」。**案例产物是本机开发资产，不随仓库发布。**
+页面粒度是**算出来的**，结论随内容变：
 
-三个例子同时演示**三种不同的页面粒度判断结果**（这是"判断真的会发生"的实证，不是巧合）：
-
-| 示例 | 页面粒度 | 页内导航 | 为什么 |
+| 内容形态 | 页面粒度 | 页内导航 | 为什么 |
 |---|---|---|---|
-| `12sqm-coffee` | `single` | `none` | 3 个区块，内容浅，拆页和目录都是负优化 |
-| `zigong-rabbit` | `single` | `anchor-jump` | 单页够用，但有规格/做法/FAQ 三个查阅型区块 |
-| `vivian-peng-portfolio` | `master-detail` | `none` | 17 件作品，每件要能单独分享 → 索引 + `[slug]` 详情（构建 18 页） |
+| 3 个区块、内容浅 | `single` | `none` | 拆页和目录都是负优化 |
+| 单页够用，但有规格/做法/FAQ 三个查阅型区块 | `single` | `anchor-jump` | 读者要在区块之间跳 |
+| 17 件作品，每件要能单独分享 | `master-detail` | `none` | 索引 + `[slug]` 详情 |
 
 ## 环境要求
 
